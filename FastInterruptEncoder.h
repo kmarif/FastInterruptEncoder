@@ -33,7 +33,7 @@ class Encoder
 	
 	int counts_per_rev_;
 	unsigned long prev_update_time_;
-    long prev_encoder_ticks_;
+    	long prev_encoder_ticks_;
 };
 
 #endif // __FASTINTERRUPTENCODER_H__
