@@ -1,9 +1,10 @@
 #include "Arduino.h"
 #include "FastInterruptEncoder.h"
 
-Encoder::Encoder(int pinA, int pinB, encoder_mode_t mode, uint8_t filter){
+Encoder::Encoder(int pinA, int pinB, int counts_per_rev, encoder_mode_t mode, uint8_t filter){
 	_pinA = pinA;
 	_pinB = pinB;
+	counts_per_rev_ = counts_per_rev;
 	_mode = mode;	
 	_filter = filter;
 }
@@ -79,7 +80,7 @@ Encoder::Encoder(int pinA, int pinB, encoder_mode_t mode, uint8_t filter){
 
 	  pcnt_unit_config(&r_enc_config);
 
-	  // Filter out bounces and noise
+	  // Filter out bounces and noise (250)
 	  pcnt_set_filter_value(unit, _filter);
 	  pcnt_filter_enable(unit); 
 
@@ -177,4 +178,22 @@ int32_t Encoder::getTicks(){
 
 void Encoder::resetTicks(){
 	_ticks = 0;
+}
+
+int Encoder::getRPM(){
+	long encoder_ticks = getTicks();
+	//this function calculates the motor's RPM based on encoder ticks and delta time
+	unsigned long current_time = millis();
+	unsigned long dt = current_time - prev_update_time_;
+
+	//convert the time from milliseconds to minutes
+	double dtm = (double)dt / 60000;
+	double delta_ticks = encoder_ticks - prev_encoder_ticks_;
+
+	//calculate wheel's speed (RPM)
+
+	prev_update_time_ = current_time;
+	prev_encoder_ticks_ = encoder_ticks;
+	
+	return (delta_ticks / counts_per_rev_) / dtm;
 }
